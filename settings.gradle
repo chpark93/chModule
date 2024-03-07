@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+        gradlePluginPortal()
+    }
+}
+rootProject.name = 'chModule'
+include 'ch-core'
+include 'ch-user'
+include 'ch-catalog'
+include 'ch-order'
+include 'ch-batch'
+include 'ch-eureka'
+include 'ch-gateway'
+

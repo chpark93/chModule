@@ -1,0 +1,98 @@
+package com.ch.core.common.response;
+
+import com.ch.core.code.Errors;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ErrorResponse {
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime timestamp;
+    private int status;
+    private String result;
+    private String message;
+    private Object data;
+    private List<FieldError> error;
+
+
+    private ErrorResponse(final Errors code, final List<FieldError> error) {
+        this.timestamp = LocalDateTime.now();
+        this.status = code.getState();
+        this.result = "fail";
+        this.message = code.getMessage();
+        this.data = Collections.emptyList();
+        this.error = error;
+    }
+
+    private ErrorResponse(final Errors code) {
+        this.timestamp = LocalDateTime.now();
+        this.status = code.getState();
+        this.result = "fail";
+        this.message = code.getMessage();
+        this.data = Collections.emptyList();
+        this.error = Collections.emptyList();
+    }
+
+
+    public static ErrorResponse of(final Errors code, final BindingResult bindingResult) {
+        return new ErrorResponse(code, FieldError.of(bindingResult));
+    }
+
+    public static ErrorResponse of(final Errors code) {
+        return new ErrorResponse(code);
+    }
+
+    public static ErrorResponse of(final Errors code, final List<FieldError> errors) {
+        return new ErrorResponse(code, errors);
+    }
+
+    public static ErrorResponse of(MethodArgumentTypeMismatchException e) {
+        final String value = e.getValue() == null ? "" : e.getValue().toString();
+        final List<ErrorResponse.FieldError> errors = ErrorResponse.FieldError.of(e.getName(), value, e.getErrorCode());
+        return new ErrorResponse(Errors.BAD_REQUEST, errors);
+    }
+
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class FieldError {
+        private String field;
+        private String value;
+        private String reason;
+
+        private FieldError(final String field, final String value, final String reason) {
+            this.field = field;
+            this.value = value;
+            this.reason = reason;
+        }
+
+        public static List<FieldError> of(final String field, final String value, final String reason) {
+            List<FieldError> fieldErrors = new ArrayList<>();
+            fieldErrors.add(new FieldError(field, value, reason));
+            return fieldErrors;
+        }
+
+        private static List<FieldError> of(final BindingResult bindingResult) {
+            final List<org.springframework.validation.FieldError> fieldErrors = bindingResult.getFieldErrors();
+            return fieldErrors.stream()
+                    .map(error -> new FieldError(
+                            error.getField(),
+                            error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
+                            error.getDefaultMessage()))
+                    .toList();
+        }
+    }
+}

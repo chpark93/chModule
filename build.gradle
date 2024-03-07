@@ -1,0 +1,261 @@
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '3.2.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.bootJar {
+    enabled = false
+}
+
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+
+sourceSets {
+    main.java.srcDir querydslDir
+}
+
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    querydsl.extendsFrom compileClasspath
+}
+
+subprojects {
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+
+    group 'com.ch'
+    sourceCompatibility = 17
+    targetCompatibility = 17
+    compileJava.options.encoding = 'UTF-8'
+
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+    tasks.withType(JavaCompile){
+        options.encoding = 'UTF-8'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-websocket'
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-batch'
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        implementation 'org.springframework.boot:spring-boot-starter-quartz'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+        implementation 'org.springframework.boot:spring-boot-configuration-processor'
+        implementation 'org.springframework.boot:spring-boot-devtools'
+        implementation 'org.springframework.boot:spring-boot-autoconfigure'
+        implementation 'org.springframework:spring-beans'
+        implementation 'org.springframework:spring-core'
+        implementation 'org.springframework:spring-expression'
+        implementation 'org.springframework:spring-tx'
+
+        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+        implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+        implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.0.0'
+        implementation group: 'org.json', name: 'json', version: '20220924'
+        implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+        implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.262'
+        implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
+
+        implementation "org.aspectj:aspectjrt:1.9.7"
+        implementation "org.aspectj:aspectjweaver:1.9.7"
+
+        // JWT
+        implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+        implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+        implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+        // Redis
+        implementation 'org.springframework.session:spring-session-data-redis'
+        implementation group: 'redis.clients', name: 'jedis', version: '4.2.3'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        runtimeOnly 'com.h2database:h2'
+
+        // Querydsl Start
+        implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+        annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+        annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+        annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+        // Querydsl End
+
+        // jpa query log
+        implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.0'
+
+        // open api spring doc
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+        implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+project(':ch-core') {
+
+    bootJar.enabled = false
+    jar.enabled = true
+
+    dependencies {}
+}
+
+project(':ch-user') {
+    dependencies {
+        implementation project(':ch-core')
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.1'
+        implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.0'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        // resilience4j
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.0'
+        // zipkin
+        implementation 'io.micrometer:micrometer-observation'
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        // Kafka
+        implementation 'org.springframework.kafka:spring-kafka'
+
+        implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
+
+        testImplementation 'org.springframework.security:spring-security-test'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    }
+}
+
+project(':ch-catalog') {
+    dependencies {
+        implementation project(':ch-core')
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.1'
+        implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.0'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        // resilience4j
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.0'
+        // zipkin
+        implementation 'io.micrometer:micrometer-observation'
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        // Kafka
+        implementation 'org.springframework.kafka:spring-kafka'
+
+        implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
+
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    }
+}
+project(':ch-order') {
+    dependencies {
+        implementation project(':ch-core')
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.1'
+        implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.0'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        // resilience4j
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.0'
+        // zipkin
+        implementation 'io.micrometer:micrometer-observation'
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        // Kafka
+        implementation 'org.springframework.kafka:spring-kafka'
+
+        implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
+
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    }
+}
+
+project(':ch-batch') {
+    dependencies {
+        compileOnly project(':ch-core')
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+    }
+}
+
+project(':ch-eureka') {
+    dependencies {
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:4.1.0'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.cloud:spring-cloud-dependencies:2023.0.0'
+        }
+    }
+}
+
+project(':ch-gateway') {
+    dependencies {
+        implementation 'org.springframework.cloud:spring-cloud-starter-gateway:4.1.1'
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j:3.1.0'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.1'
+        implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.0'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.1.0'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.cloud:spring-cloud-dependencies:2023.0.0'
+        }
+    }
+}
