@@ -164,6 +164,8 @@ project(':ch-user') {
         implementation 'io.micrometer:micrometer-observation'
         implementation 'io.micrometer:micrometer-tracing-bridge-brave'
         implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        implementation 'io.micrometer:micrometer-registry-prometheus:1.12.3'
+        implementation 'io.github.openfeign:feign-micrometer:13.2.1'
         // Kafka
         implementation 'org.springframework.kafka:spring-kafka'
 
@@ -190,6 +192,8 @@ project(':ch-catalog') {
         implementation 'io.micrometer:micrometer-observation'
         implementation 'io.micrometer:micrometer-tracing-bridge-brave'
         implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        implementation 'io.micrometer:micrometer-registry-prometheus:1.12.3'
+        implementation 'io.github.openfeign:feign-micrometer:13.2.1'
         // Kafka
         implementation 'org.springframework.kafka:spring-kafka'
 
@@ -214,6 +218,9 @@ project(':ch-order') {
         implementation 'io.micrometer:micrometer-observation'
         implementation 'io.micrometer:micrometer-tracing-bridge-brave'
         implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+        implementation 'io.micrometer:micrometer-registry-prometheus:1.12.3'
+        implementation 'io.github.openfeign:feign-micrometer:13.2.1'
+
         // Kafka
         implementation 'org.springframework.kafka:spring-kafka'
 
@@ -251,6 +258,8 @@ project(':ch-gateway') {
         implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.0'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.1.0'
+        // zipkin
+        implementation 'io.micrometer:micrometer-registry-prometheus:1.12.3'
     }
 
     dependencyManagement {

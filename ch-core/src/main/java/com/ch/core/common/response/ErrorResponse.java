@@ -21,7 +21,7 @@ public class ErrorResponse {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime timestamp;
-    private int status;
+    private int state;
     private String result;
     private String message;
     private Object data;
@@ -30,7 +30,7 @@ public class ErrorResponse {
 
     private ErrorResponse(final Errors code, final List<FieldError> error) {
         this.timestamp = LocalDateTime.now();
-        this.status = code.getState();
+        this.state = code.getState();
         this.result = "fail";
         this.message = code.getMessage();
         this.data = Collections.emptyList();
@@ -39,7 +39,7 @@ public class ErrorResponse {
 
     private ErrorResponse(final Errors code) {
         this.timestamp = LocalDateTime.now();
-        this.status = code.getState();
+        this.state = code.getState();
         this.result = "fail";
         this.message = code.getMessage();
         this.data = Collections.emptyList();

@@ -5,12 +5,6 @@ server:
 spring:
   application:
     name: catalog-service
-  zipkin:
-    base-url: http://localhost:9411
-    enabled: true
-  sleuth:
-    sampler:
-      probability: 1.0
   session:
     store-type: redis
   # JPA
@@ -34,6 +28,10 @@ spring:
     port: 5672
     username: guest
     password: guest
+  cloud:
+    openfeign:
+      micrometer:
+        enabled: true
 
 # Eureka
 eureka:
@@ -47,14 +45,25 @@ eureka:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: B3
+      produce: B3_MULTI
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans, busrefresh
+        include: health, httptrace, info, metrics, prometheus
 
 logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    com.ch.order: debug
+    com.ch.catalog: DEBUG
     org:
       hibernate:
         type:

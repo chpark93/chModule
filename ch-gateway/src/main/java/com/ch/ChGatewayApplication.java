@@ -14,9 +14,4 @@ public class ChGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(ChGatewayApplication.class, args);
     }
-
-    @Bean
-    public HttpExchangeRepository httpTraceRepository() {
-        return new InMemoryHttpExchangeRepository();
-    }
 }

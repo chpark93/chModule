@@ -3,19 +3,18 @@ package com.ch.user.api;
 import com.ch.core.common.response.ErrorResponse;
 import com.ch.core.common.response.Response;
 import com.ch.core.utils.HelperUtil;
+import com.ch.user.application.UserService;
 import com.ch.user.dto.request.LoginRequest;
 import com.ch.user.dto.request.SignUpRequest;
 import com.ch.user.dto.request.UserRequest;
 import com.ch.user.dto.response.LoginResponse;
 import com.ch.user.dto.response.SignUpResponse;
-import com.ch.user.application.UserService;
 import com.ch.user.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +25,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @Tag(name = "User API", description = "User 로그인, 회원가입 API")
 @Slf4j
@@ -52,7 +49,7 @@ public class UserApi {
             return response.invalidFields(HelperUtil.refineErrors(errors));
         }
 
-        return response.success(userService.login(loginRequest), "Success", HttpStatus.OK);
+        return response.success(userService.login(loginRequest), HttpStatus.OK);
     }
 
     @Operation(summary = "SignUp", description = "User SignUp API.")
@@ -70,7 +67,7 @@ public class UserApi {
             return response.invalidFields(HelperUtil.refineErrors(errors));
         }
 
-        return response.success(userService.signUp(signUp), "Success", HttpStatus.OK);
+        return response.success(userService.signUp(signUp), HttpStatus.OK);
     }
 
     @Operation(summary = "RefreshToken", description = "User Token Refresh API.")
@@ -86,7 +83,7 @@ public class UserApi {
             return response.invalidFields(HelperUtil.refineErrors(errors));
         }
 
-        return response.success(userService.refreshToken(request, refreshToken), "Success", HttpStatus.OK);
+        return response.success(userService.refreshToken(request, refreshToken), HttpStatus.OK);
     }
 
     @Operation(summary = "Logout", description = "User Logout API.")
@@ -101,7 +98,7 @@ public class UserApi {
             return response.invalidFields(HelperUtil.refineErrors(errors));
         }
 
-        return response.success(userService.logout(request, logout), "Success", HttpStatus.OK);
+        return response.success(userService.logout(request, logout), HttpStatus.OK);
     }
 
     @Operation(summary = "getProfileFromUserId", description = "User getProfileFromUserId API.")
@@ -113,7 +110,7 @@ public class UserApi {
     public ResponseEntity<Response.Body> getProfileFromUserId(@PathVariable String userId) {
         UserResponse userInfo = userService.getProfileFromUserId(userId);
 
-        return response.success(userInfo, "Success", HttpStatus.OK);
+        return response.success(userInfo, HttpStatus.OK);
     }
 
 }
